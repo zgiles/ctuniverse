@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<meta charset="UTF-8" />
+	<title>Sample of websocket with golang</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+	<script>
+	var universe = {}
+	var badobjects = []
+	var owneruuid = guid()
+	var ship = {
+		uuid: guid(),
+		owner: owneruuid,
+		type: 'ship',
+		global_x: 0,
+		global_y: 0,
+		fuel: 10,
+		weight: 100,
+		decay: 0,
+		velocity_x: 0,
+		velocity_y: 0
+	}
+
+	function guid() {
+		function s4() {
+			return Math.floor((1 + Math.random()) * 0x10000)
+			.toString(16)
+			.substring(1);
+		}
+		return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+		s4() + '-' + s4() + s4() + s4();
+	}
+
+	updatemyship = function() {
+		ship.global_x = ship.global_x + Math.floor(Math.random() * 1000 %1000)-500
+		ship.global_y = ship.global_x + Math.floor(Math.random() * 1000 %1000)-500
+		ship.velocity_x = ship.global_x + Math.floor(Math.random() * 1000 %1000)-500
+		ship.velocity_y = ship.global_x + Math.floor(Math.random() * 1000 %1000)-500
+		render();
+	}
+	
+	render = function() {
+		$('#shipspan').text(JSON.stringify(ship));
+		$('#shiplist').text(universe);
+		$('#badobjects').text(JSON.stringify(badobjects));
+	}
+		
+
+	$(function() {
+		$('#owneruuid').text(owneruuid);
+		var socket = new WebSocket("ws://bubbles.ri.zrg.cc:8080/ws");
+		socket.onopen = function() {
+			console.log("WebSocket Open!");
+		}
+		socket.onmessage = function(e) {
+			if (e != undefined && e.uuid != undefined) {
+				universe[e.uuid] = e;
+			} else {
+				badobjects.push(e)
+			}
+			render();
+		}
+		socket.onclose = function() {
+			console.log("WebSocket Closed!");
+		}
+		$('#pushmyship').click(function() {
+			socket.send(JSON.stringify(ship));
+			console.log('sending ship: ' + ship);
+		});
+		$('#updatemyship').click(function() {
+			updatemyship()
+		});
+		updatemyship();
+	});
+
+	</script>
+	</head>
+	<body>
+		<h2>Your Owner UUID:</h2>
+		<span id="owneruuid"></span>
+		<h2>Your Ship:</h2>
+		<span id="shipspan"></span><br/>
+		<input type="button" id="pushmyship" value="Push Ship"></input>
+		<input type="button" id="updatemyship" value="Update Ship"></input>
+		<h2>Everyone Else's Ships:</h2>
+		<ul id='shiplist'><ul>
+		<h2>BadObjects:</h2>
+		<ul id='badobjects'></ul>
+	</body>
+</html>
