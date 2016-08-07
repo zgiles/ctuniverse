@@ -6,5 +6,5 @@ import (
 )
 
 func wshandler(ws *websocket.Conn) {
-	io.WriteString(ws, "HELLO")
+	io.WriteString(ws, "{ \"uuid\": \"123-212-321-231\" }")
 }
