@@ -4,7 +4,6 @@ import (
 	"log"
 	"strconv"
 	"time"
-	"golang.org/x/net/websocket"
 	"net/http"
 	"github.com/tylerb/graceful" // "gopkg.in/tylerb/graceful.v1"
 	"github.com/gorilla/context"
@@ -67,7 +66,7 @@ func main() {
 	router := httprouter.New()
 	// router.GET("/", wrapHandler(commonHandlers.ThenFunc(indexHandler)))
 	router.GET("/", wrapHandler(http.FileServer(http.Dir("static/"))))
-	router.GET("/ws", wrapHandler(websocket.Handler(wshandler)))
+	router.GET("/ws", wrapHandler(commonHandlers.ThenFunc(wshandler)))
 	// router.GET("/ws", wrapHandler(commonHandlers.ThenFunc(websocket.Handler(wshandler))))
 	router.NotFound = commonHandlers.ThenFunc(errorHandler)
 
