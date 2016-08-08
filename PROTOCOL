@@ -1,0 +1,98 @@
+protocol..
+
+# Overall concepts
+
+event types: every event will have an event type, many will have a "req" and an "ack" which are the call and responses for each other. Others are one way requests that will return a generic answer. The latter is beneficial for highly async operations that could be pushed to the client without a reqest as well.
+
+epochs: it may be beneficial to know the remote time of a client or server. One benefit may be handling out-of-order messages. ( Inserting an object into the database that is older than one already there should not happen, since we only care about current position. ) Another benefit can be acknowleding a request. This could be handled with a random ID, but it might as well be a continously increasing unique number, the best of which is time. Many requests have epoch requirements. If a response is due, the responder will give its epoch also and an originepoch which is the requestor's epoch to which it is responding.
+This does not account for multiple clients in the same channel and thus may be duplicate across requestors, but should be unique per request type per client ( Thought not hard-guarenteed. ) Will revisit later.
+All epochs should be in unix epoch time to the millisecond. (Javascript default)
+
+
+# Connecting
+
+Client will connect to the server, then some handshaking will commence:
+
+* If the server has no UUID for the client, it will send a message asking for one, regardless of the message sent to the server
+(The server will also send this as an initial hello)
+{
+  event: 'idreq',
+  epoch: epochms
+}
+
+The client should respond:
+{
+  event: 'id',
+  epoch: epochms
+  originepoch: epochms
+  uuid: UUID
+  attributes: { ADDITIONALDETAILS }
+}
+
+If the client has a valid client id on file, other requests can be processed.
+If the client tries to ID again ater after already IDing, it will be disconnected.
+
+# Pinging
+Either the server or the client may periodically send ping requests, at their discression.
+This may happen if an update has not occured for some time, as an example.
+Ping requests may be surpressed if other updates are being sent regularly, they are not required. ( Other requests may satisfy a ping, and have more data. )
+If a ping is sent and the remote is operating, it is required to respond ( given that it can. If it can not, it is considered dead. )
+
+Ping Request:
+{
+  event: 'ping',
+  epoch: epochms
+}
+
+Pong Response:
+{
+  event: 'pong',
+  epoch: epochms
+  originepoch: epochms
+}
+
+# Universe Object Submission
+A universe object should be submitted by wrapping it in a universeobjectupdate event and submitting it
+
+Universe Object Submission
+{ 
+  event: 'uos',
+  epoch: epochms
+  o: [ UNIVERSEOBJECT(s) ]
+}
+
+Universe Object Submission Ack
+{
+  event: 'uosack',
+  epoch: epochms
+  originepoch: epochms
+}
+
+
+# Request for Universe Objects
+A request for object will return objects in a certain space. Currently only objects by space is implemented
+For the request for objects by space, the requester asks for an x and y position an some distance positive of that space. The distance scope will be applied to both the x and y directions. Thus, if you ask for position x = 10000, and y = 20000 with a distance of 5000, the reply should be all objects with a current x between 10000 and 15000; and between 20000 and 25000.
+
+Universe Objects Request
+{
+  event: 'uorbyspace',
+  epoch: epochms
+  global_x: int64,
+  global_y: int64,
+  distance: int64
+}
+
+Replies for Universe Objects will be the same regardless of the requeest. This is because all incoming Universe Object should be placed into the client Remote Objects list and read / used from their regardless of the way they were injected into the browser.
+
+Universe Object Update
+{
+  event: 'uou',
+  epoch: epochms
+  o: [ UNIVERSEOBJECT(s) ]
+}
+
+
+
+
+
+
