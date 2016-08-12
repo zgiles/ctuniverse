@@ -1,62 +1,68 @@
-package main
+// Code by Zachary Giles
+// This code is under the MIT License, a copy of which is found in the LICENSE file.
 
+package ctuniverse
+
+/*
 import (
 	"errors"
-	"github.com/zgiles/ctuniverse"
 )
+*/
 
-type Wsmsg struct {
+type UniverseMsg struct {
 	Event string `json:"event"`
 	Epoch int64 `json:"epoch"`
 }
 
-type Wsmsg_idreq struct {
-	Wsmsg
+type UniverseMsg_idreq struct {
+	UniverseMsg
 }
 
-type Wsmsg_id struct {
-	Wsmsg
+type UniverseMsg_id struct {
+	UniverseMsg
 	Originepoch int64 `json:"originepoch"`
 	Uuid int64 `json:"uuid"`
 	Attributes map[string]string `json:"attributes"`
 }
 
-type Wsmsg_ping struct {
-	Wsmsg
+type UniverseMsg_ping struct {
+	UniverseMsg
 }
 
-type Wsmsg_pong struct {
-	Wsmsg
+type UniverseMsg_pong struct {
+	UniverseMsg
 	Originepoch int64 `json:"originepoch"`
 }
 
-type Wsmsg_uos struct {
-	Wsmsg
-	O []ctuniverse.UniverseObject `json:"o"`
+type UniverseMsg_uos struct {
+	UniverseMsg
+	O []UniverseObject `json:"o"`
 }
 
-type Wsmsg_uosack struct {
-	Wsmsg
+type UniverseMsg_uosack struct {
+	UniverseMsg
 	Originepoch int64 `json:"originepoch"`
 }
 
-type Wsmsg_eorbyspace struct {
-	Wsmsg
+type UniverseMsg_eorbyspace struct {
+	UniverseMsg
 	Global_x int64 `json:"global_x"`
 	Global_y int64 `json:"global_y"`
 	Distance int64 `json:"distance"`
 }
 
-type Wsmsg_uou struct {
-	Wsmsg
-	O []ctuniverse.UniverseObject `json:"o"`
+type UniverseMsg_uou struct {
+	UniverseMsg
+	O []UniverseObject `json:"o"`
 }
 
+// Not correct syntax for coercing types.. not needed anymore.. yet
+/*
 func (msg Wsmsg) CoerceToType(map[string]interface{}) (interface{}, error) {
 	switch msg.Event {
 		case "idreq":
 			return Wsmsg_idreq{msg}, nil
-		case "id": 
+		case "id":
 			return Wsmsg_id{msg}, nil
 		case "ping":
 			return Wsmsg_ping{msg}, nil
@@ -74,3 +80,4 @@ func (msg Wsmsg) CoerceToType(map[string]interface{}) (interface{}, error) {
 			return msg, errors.New("Message Type not implemented")
 	}
 }
+*/
