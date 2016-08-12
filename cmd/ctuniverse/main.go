@@ -24,6 +24,7 @@ func main() {
 		log.Fatal(configerr)
 	}
 
+	log.Println("App Setting up...")
 	hub := newHub()
 	go hub.run()
 
@@ -38,6 +39,7 @@ func main() {
 	})
 	router.NotFound = commonHandlers.ThenFunc(logging.ErrorHandler)
 
+	log.Println("App running...")
 	// Server
 	httpsrv := &graceful.Server{
 		Timeout: time.Duration(config.Serverconfig.Closetimeout) * time.Second,
