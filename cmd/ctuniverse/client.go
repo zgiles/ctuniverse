@@ -16,6 +16,11 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+var (
+	newline = []byte{'\n'}
+	space   = []byte{' '}
+)
+
 var upgrader = websocket.Upgrader{
 	ReadBufferSize: 1024,
 	WriteBufferSize: 1024,
@@ -43,11 +48,11 @@ func (c *Client) write(mt int, payload []byte) error {
 func (c *Client) writePump() {
 	defer func() {
 		c.conn.Close()
-	}
+	}()
 	// forever loop
 	for {
-		select {
-			message, chanopen := <-c.send:
+		// select {
+			message, chanopen := <-c.send //:
 				if !chanopen {
 					c.write(websocket.CloseMessage, []byte{})
 					return
@@ -64,7 +69,7 @@ func (c *Client) writePump() {
 					log.Printf("error: %v", closeerr)
 					return
 				}
-		}
+		// }
 	}
 }
 
@@ -72,7 +77,7 @@ func (c *Client) readPump() {
 	defer func() {
 		c.hub.unregister <- c
 		c.conn.Close()
-	}
+	}()
 	for {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
@@ -86,13 +91,13 @@ func (c *Client) readPump() {
 	}
 }
 
-func wshandler(h *Hub, w http.ResponseWriter, r *http.Request) {
+func wshandler(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("error: %v", err)
 		return
 	}
-	c := &Client{ hub: hub, conn: conn, send: make(chan []byte, 256), uuid: nil, attributes: {} }
+	c := &Client{ hub: hub, conn: conn, send: make(chan []byte, 256) }
 	c.hub.register <- c
 	log.Println("New Client: %s", c)
 	go c.writePump()
