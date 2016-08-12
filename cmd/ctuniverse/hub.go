@@ -45,6 +45,7 @@ func (h *Hub) run() {
 				close(client.send)
 			}
 		case message := <-h.broadcast:
+			// here push message to fellow servers
 			for client := range h.clients {
 				select {
 				case client.send <- message:

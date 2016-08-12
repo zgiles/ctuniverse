@@ -57,6 +57,7 @@ func (c *Client) writePump() {
 			c.write(websocket.CloseMessage, []byte{})
 			return
 		}
+		// here check if it is a message from us..
 		w, writeerr := c.conn.NextWriter(websocket.TextMessage)
 		if writeerr != nil {
 			log.Printf("error: %v", writeerr)
