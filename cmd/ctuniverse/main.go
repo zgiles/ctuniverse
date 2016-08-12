@@ -25,7 +25,7 @@ func main() {
 	}
 
 	// app context
-	appC := appContext{ universestore: l_universestore }
+	appC := appContext{}
 
 	// Handlers
 	commonHandlers := alice.New(context.ClearHandler, loggingHandler, recoverHandler)
