@@ -25,7 +25,7 @@ func main() {
 	go hub.run()
 
 	// Handlers
-	commonHandlers := alice.New(context.ClearHandler, logging.loggingHandler, logging.recoverHandler)
+	commonHandlers := alice.New(context.ClearHandler, logging.LoggingHandler, logging.RecoverHandler)
 
 	router := httprouter.New()
 	router.GET("/", wrapHandler(http.FileServer(http.Dir("static/"))))
@@ -33,7 +33,7 @@ func main() {
 		context.Set(r, "params", ps)
 		wshandler(hub, w, r)
 	})
-	router.NotFound = commonHandlers.ThenFunc(logging.errorHandler)
+	router.NotFound = commonHandlers.ThenFunc(logging.ErrorHandler)
 
 	// Server
 	httpsrv := &graceful.Server{
