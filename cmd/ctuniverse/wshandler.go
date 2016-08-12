@@ -14,6 +14,7 @@ var upgrader = websocket.Upgrader{
 // Short explaination
 // picking up the conn so that go routines on the Client can use the conn
 // we have a send chan so that messages can get queued into the Client, however, recv is handled by a go routine.. no need for a channel.
+// we need a send chan because we are required to ensure only one writer is sending to the client
 type Client struct {
 	uuid string
 	attributes map[string]string
@@ -21,6 +22,7 @@ type Client struct {
 	send chan []byte
 }
 
+// This is write to client from send chan
 func (c *Client) writePump() {
 	defer func() {
 		c.conn.Close()

@@ -4,12 +4,6 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-type redisconfig struct {
-	Enabled  bool
-	Host     string
-	Password string
-}
-
 type serverconfig struct {
 	Maindb       string
 	Ip           string
@@ -18,7 +12,6 @@ type serverconfig struct {
 }
 
 type config struct {
-	Redisconfig  redisconfig
 	Serverconfig serverconfig
 }
 

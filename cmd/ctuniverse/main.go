@@ -9,8 +9,6 @@ import (
 	"github.com/gorilla/context"
 	"github.com/julienschmidt/httprouter"
 	"github.com/justinas/alice"
-	redis_universedb "github.com/zgiles/ctuniverse/db/redis/universedb"
-	universestore "github.com/zgiles/ctuniverse/stores/universestore"
 )
 
 type appContext struct {
@@ -26,39 +24,8 @@ func main() {
 		log.Fatal(configerr)
 	}
 
-	// Local Variables
-	var l_universestoredb universestore.StoreDBI
-	var l_universestore universestore.StoreI
-
-	// open the database
-	switch config.Serverconfig.Maindb {
-	case "redis":
-		if config.Redisconfig.Enabled == false {
-			log.Fatal("redis selected, but not enabled")
-		}
-
-		log.Println("redis: opening redis connection")
-		redispool, rediserr := redisStart(config.Redisconfig) // this is a redispool *redis.Pool
-		if rediserr != nil {
-			log.Fatal(rediserr)
-		}
-		defer log.Println("redis: no close needed...")
-		// defer db.Close()
-		log.Println("redis: open")
-
-		log.Println("redis: opening UniverseStoreDB")
-		l_universestoredb = redis_universedb.New(redispool)
-		log.Println("redis: opening UnivserStore")
-		l_universestore = universestore.New(l_universestoredb)
-
-	default:
-		log.Fatal("no valid db selected as primary")
-	}
-
 	// app context
 	appC := appContext{ universestore: l_universestore }
-	log.Println("app ready")
-	log.Println(appC)
 
 	// Handlers
 	commonHandlers := alice.New(context.ClearHandler, loggingHandler, recoverHandler)
