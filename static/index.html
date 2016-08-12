@@ -8,6 +8,9 @@
 	var universe = {}
 	var badobjects = []
 	var owneruuid = guid()
+	var rendertimer;
+	var updatetimer;
+	var sendtimer;
 	var ship = {
 		uuid: guid(),
 		owner: owneruuid,
@@ -31,7 +34,7 @@
 		s4() + '-' + s4() + s4() + s4();
 	}
 
-	updatemyship = function() {
+	function updatemyship() {
 		ship.global_x = ship.global_x + Math.floor(Math.random() * 1000 %1000)-500
 		ship.global_y = ship.global_x + Math.floor(Math.random() * 1000 %1000)-500
 		ship.velocity_x = ship.global_x + Math.floor(Math.random() * 1000 %1000)-500
@@ -39,7 +42,7 @@
 		render();
 	}
 
-	render = function() {
+	function render() {
 		$('#shipspan').text(JSON.stringify(ship));
 		$('#shiplist').html(Object.keys(universe).reduce(function(t, x) {
 			return t + '<li>' + JSON.stringify(universe[x]) + '</li>';
@@ -47,13 +50,25 @@
 		$('#badobjects').text(JSON.stringify(badobjects));
 	}
 
-
 	$(function() {
 		$('#owneruuid').text(owneruuid);
+
+		// This simulates a normal background physics update and re-render
+		// at different times and not the same as the updates coming off the web.
+		rendertimer = setInterval(render, 100);
+		updatetimer = setInterval(updatemyship, 1000);
+
 		var socket = new WebSocket("ws://bubbles.ri.zrg.cc:8080/ws");
+
 		socket.onopen = function() {
 			console.log("WebSocket Open!");
+			// This sends our data out every second.
+			sendtimer = setInterval(function() {
+				socket.send(JSON.stringify(ship));
+				console.log('timer: sending ship');
+			}, 1000);
 		}
+
 		socket.onmessage = function(e) {
 			console.log(e);
 			m = JSON.parse(e.data) || {};
@@ -63,19 +78,22 @@
 			} else {
 				badobjects.push(m)
 			}
-			render();
 		}
+
 		socket.onclose = function() {
+			clearInterval(sendtimer);
 			console.log("WebSocket Closed!");
 		}
+
 		$('#pushmyship').click(function() {
 			socket.send(JSON.stringify(ship));
 			console.log('sending ship');
 		});
+
 		$('#updatemyship').click(function() {
 			updatemyship()
 		});
-		updatemyship();
+
 	});
 
 	</script>
