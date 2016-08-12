@@ -1,21 +1,19 @@
+// Code by Zachary Giles
+// This code is under the MIT License, a copy of which is found in the LICENSE file.
+
 package main
 
 import (
-	"log"
-	"strconv"
-	"time"
-	"net/http"
-	"github.com/tylerb/graceful" // "gopkg.in/tylerb/graceful.v1"
 	"github.com/gorilla/context"
 	"github.com/julienschmidt/httprouter"
 	"github.com/justinas/alice"
-	redis_universedb "github.com/zgiles/ctuniverse/db/redis/universedb"
-	universestore "github.com/zgiles/ctuniverse/stores/universestore"
+	"github.com/tylerb/graceful" // "gopkg.in/tylerb/graceful.v1"
+	"github.com/zgiles/ctuniverse/logging"
+	"log"
+	"net/http"
+	"strconv"
+	"time"
 )
-
-type appContext struct {
-	universestore universestore.StoreI
-}
 
 func main() {
 	// Options Parse
@@ -26,48 +24,22 @@ func main() {
 		log.Fatal(configerr)
 	}
 
-	// Local Variables
-	var l_universestoredb universestore.StoreDBI
-	var l_universestore universestore.StoreI
-
-	// open the database
-	switch config.Serverconfig.Maindb {
-	case "redis":
-		if config.Redisconfig.Enabled == false {
-			log.Fatal("redis selected, but not enabled")
-		}
-
-		log.Println("redis: opening redis connection")
-		redispool, rediserr := redisStart(config.Redisconfig) // this is a redispool *redis.Pool
-		if rediserr != nil {
-			log.Fatal(rediserr)
-		}
-		defer log.Println("redis: no close needed...")
-		// defer db.Close()
-		log.Println("redis: open")
-
-		log.Println("redis: opening UniverseStoreDB")
-		l_universestoredb = redis_universedb.New(redispool)
-		log.Println("redis: opening UnivserStore")
-		l_universestore = universestore.New(l_universestoredb)
-
-	default:
-		log.Fatal("no valid db selected as primary")
-	}
-
-	// app context
-	appC := appContext{ universestore: l_universestore }
-	log.Println("app ready")
-	log.Println(appC)
+	log.Println("App Setting up...")
+	hub := newHub()
+	go hub.run()
 
 	// Handlers
-	commonHandlers := alice.New(context.ClearHandler, loggingHandler, recoverHandler)
+	commonHandlers := alice.New(context.ClearHandler, logging.LoggingHandler, logging.RecoverHandler)
 
 	router := httprouter.New()
 	router.GET("/", wrapHandler(http.FileServer(http.Dir("static/"))))
-	router.GET("/ws", wrapHandler(commonHandlers.ThenFunc(wshandler)))
-	router.NotFound = commonHandlers.ThenFunc(errorHandler)
+	router.GET("/ws", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		context.Set(r, "params", ps)
+		wshandler(hub, w, r)
+	})
+	router.NotFound = commonHandlers.ThenFunc(logging.ErrorHandler)
 
+	log.Println("App running...")
 	// Server
 	httpsrv := &graceful.Server{
 		Timeout: time.Duration(config.Serverconfig.Closetimeout) * time.Second,
@@ -76,12 +48,12 @@ func main() {
 			Handler: router,
 		},
 	}
+
 	httperr := httpsrv.ListenAndServe()
 	if httperr != nil {
 		log.Fatal(httperr)
 	}
 
 	log.Println("main: end of main")
-
 
 }

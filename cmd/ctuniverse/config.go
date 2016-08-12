@@ -1,14 +1,11 @@
+// Code by Zachary Giles
+// This code is under the MIT License, a copy of which is found in the LICENSE file.
+
 package main
 
 import (
 	"github.com/BurntSushi/toml"
 )
-
-type redisconfig struct {
-	Enabled  bool
-	Host     string
-	Password string
-}
 
 type serverconfig struct {
 	Maindb       string
@@ -18,7 +15,6 @@ type serverconfig struct {
 }
 
 type config struct {
-	Redisconfig  redisconfig
 	Serverconfig serverconfig
 }
 
