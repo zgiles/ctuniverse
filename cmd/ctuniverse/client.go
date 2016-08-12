@@ -11,9 +11,9 @@ package main
 
 import (
 	"bytes"
+	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
-	"github.com/gorilla/websocket"
 )
 
 var (
@@ -22,7 +22,7 @@ var (
 )
 
 var upgrader = websocket.Upgrader{
-	ReadBufferSize: 1024,
+	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 }
 
@@ -33,10 +33,10 @@ var upgrader = websocket.Upgrader{
 // uuid is this connections id, shows the client has identified itself.. maybe another way later
 // attributes are the additional data about the client, how it wants to receive things, flags, etc.
 type Client struct {
-	hub *Hub
-	conn *websocket.Conn
-	send chan []byte
-	uuid string
+	hub        *Hub
+	conn       *websocket.Conn
+	send       chan []byte
+	uuid       string
 	attributes map[string]string
 }
 
@@ -52,23 +52,23 @@ func (c *Client) writePump() {
 	// forever loop
 	for {
 		// select {
-			message, chanopen := <-c.send //:
-				if !chanopen {
-					c.write(websocket.CloseMessage, []byte{})
-					return
-				}
-				w, writeerr := c.conn.NextWriter(websocket.TextMessage)
-				if writeerr != nil {
-					log.Printf("error: %v", writeerr)
-					return
-				}
-				w.Write(message)
-				// Maybe optimize for more messages at once like in the chat example, keep simple for now and just close
-			  closeerr := w.Close()
-				if closeerr != nil {
-					log.Printf("error: %v", closeerr)
-					return
-				}
+		message, chanopen := <-c.send //:
+		if !chanopen {
+			c.write(websocket.CloseMessage, []byte{})
+			return
+		}
+		w, writeerr := c.conn.NextWriter(websocket.TextMessage)
+		if writeerr != nil {
+			log.Printf("error: %v", writeerr)
+			return
+		}
+		w.Write(message)
+		// Maybe optimize for more messages at once like in the chat example, keep simple for now and just close
+		closeerr := w.Close()
+		if closeerr != nil {
+			log.Printf("error: %v", closeerr)
+			return
+		}
 		// }
 	}
 }
@@ -97,7 +97,7 @@ func wshandler(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Printf("error: %v", err)
 		return
 	}
-	c := &Client{ hub: hub, conn: conn, send: make(chan []byte, 256) }
+	c := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
 	c.hub.register <- c
 	log.Println("New Client: %s", c)
 	go c.writePump()

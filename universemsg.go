@@ -11,7 +11,7 @@ import (
 
 type UniverseMsg struct {
 	Event string `json:"event"`
-	Epoch int64 `json:"epoch"`
+	Epoch int64  `json:"epoch"`
 }
 
 type UniverseMsg_idreq struct {
@@ -20,9 +20,9 @@ type UniverseMsg_idreq struct {
 
 type UniverseMsg_id struct {
 	UniverseMsg
-	Originepoch int64 `json:"originepoch"`
-	Uuid int64 `json:"uuid"`
-	Attributes map[string]string `json:"attributes"`
+	Originepoch int64             `json:"originepoch"`
+	Uuid        int64             `json:"uuid"`
+	Attributes  map[string]string `json:"attributes"`
 }
 
 type UniverseMsg_ping struct {

@@ -4,15 +4,15 @@
 package main
 
 import (
-	"log"
-	"strconv"
-	"time"
-	"net/http"
-	"github.com/zgiles/ctuniverse/logging"
-	"github.com/tylerb/graceful" // "gopkg.in/tylerb/graceful.v1"
 	"github.com/gorilla/context"
 	"github.com/julienschmidt/httprouter"
 	"github.com/justinas/alice"
+	"github.com/tylerb/graceful" // "gopkg.in/tylerb/graceful.v1"
+	"github.com/zgiles/ctuniverse/logging"
+	"log"
+	"net/http"
+	"strconv"
+	"time"
 )
 
 func main() {
@@ -53,6 +53,5 @@ func main() {
 	}
 
 	log.Println("main: end of main")
-
 
 }
