@@ -38,13 +38,15 @@
 		ship.velocity_y = ship.global_x + Math.floor(Math.random() * 1000 %1000)-500
 		render();
 	}
-	
+
 	render = function() {
 		$('#shipspan').text(JSON.stringify(ship));
-		$('#shiplist').text(universe);
+		$('#shiplist').html(Object.keys(universe).reduce(function(t, x) {
+			return t + '<li>' + JSON.stringify(universe[x]) + '</li>';
+		}, ''));
 		$('#badobjects').text(JSON.stringify(badobjects));
 	}
-		
+
 
 	$(function() {
 		$('#owneruuid').text(owneruuid);
@@ -53,10 +55,13 @@
 			console.log("WebSocket Open!");
 		}
 		socket.onmessage = function(e) {
-			if (e != undefined && e.uuid != undefined) {
-				universe[e.uuid] = e;
+			console.log(e);
+			m = JSON.parse(e.data) || {};
+			console.log(m);
+			if (m.uuid != undefined) {
+				universe[m.uuid] = m;
 			} else {
-				badobjects.push(e)
+				badobjects.push(m)
 			}
 			render();
 		}
@@ -65,7 +70,7 @@
 		}
 		$('#pushmyship').click(function() {
 			socket.send(JSON.stringify(ship));
-			console.log('sending ship: ' + ship);
+			console.log('sending ship');
 		});
 		$('#updatemyship').click(function() {
 			updatemyship()
@@ -83,7 +88,7 @@
 		<input type="button" id="pushmyship" value="Push Ship"></input>
 		<input type="button" id="updatemyship" value="Update Ship"></input>
 		<h2>Everyone Else's Ships:</h2>
-		<ul id='shiplist'><ul>
+		<ul id='shiplist'></ul>
 		<h2>BadObjects:</h2>
 		<ul id='badobjects'></ul>
 	</body>
