@@ -11,9 +11,32 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-type client struct {
+// Short explaination
+// picking up the conn so that go routines on the Client can use the conn
+// we have a send chan so that messages can get queued into the Client, however, recv is handled by a go routine.. no need for a channel.
+type Client struct {
 	uuid string
 	attributes map[string]string
+	conn *websocket.Conn
+	send chan []byte
+}
+
+func (c *Client) writePump() {
+	defer func() {
+		c.conn.Close()
+	}
+	// forever loop
+	for {
+		select {
+			message, ok := <-c.send:
+				if !ok {
+					// somethings broke. Send a control channel close
+					c.write(websocket.CloseMessage, []byte{})
+					return
+				}
+				c.conn.SetWriteDeadline()
+		}
+	}
 }
 
 func wshandler(w http.ResponseWriter, r *http.Request) {
@@ -22,8 +45,12 @@ func wshandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 		return
 	}
-	c := client{}
+	// we dont know what it's id is yet, so we will leave it blank and error when trying to use it.
+	c := &Client{ conn: conn, send: make(chan []byte, 256) }
 	fmt.Println("New Client")
+	go c.writePump()
+	c.readPump()
+
 	for {
 		_ = conn.WriteMessage(websocket.TextMessage, []byte("{ \"uuid\": \"123-212-321-231\" }"))
 		_, msg, err := conn.ReadMessage()
@@ -35,4 +62,5 @@ func wshandler(w http.ResponseWriter, r *http.Request) {
 		conn.Close()
 		return
 	}
+
 }

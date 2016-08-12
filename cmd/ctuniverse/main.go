@@ -30,7 +30,7 @@ func main() {
 	var l_universestoredb universestore.StoreDBI
 	var l_universestore universestore.StoreI
 
-
+	// open the database
 	switch config.Serverconfig.Maindb {
 	case "redis":
 		if config.Redisconfig.Enabled == false {
@@ -53,23 +53,22 @@ func main() {
 
 	default:
 		log.Fatal("no valid db selected as primary")
-
 	}
 
 	// app context
 	appC := appContext{ universestore: l_universestore }
-	log.Println("app ready")		
+	log.Println("app ready")
 	log.Println(appC)
 
+	// Handlers
 	commonHandlers := alice.New(context.ClearHandler, loggingHandler, recoverHandler)
 
 	router := httprouter.New()
-	// router.GET("/", wrapHandler(commonHandlers.ThenFunc(indexHandler)))
 	router.GET("/", wrapHandler(http.FileServer(http.Dir("static/"))))
 	router.GET("/ws", wrapHandler(commonHandlers.ThenFunc(wshandler)))
-	// router.GET("/ws", wrapHandler(commonHandlers.ThenFunc(websocket.Handler(wshandler))))
 	router.NotFound = commonHandlers.ThenFunc(errorHandler)
 
+	// Server
 	httpsrv := &graceful.Server{
 		Timeout: time.Duration(config.Serverconfig.Closetimeout) * time.Second,
 		Server: &http.Server{
@@ -83,6 +82,6 @@ func main() {
 	}
 
 	log.Println("main: end of main")
-	
+
 
 }

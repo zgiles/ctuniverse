@@ -52,7 +52,7 @@ type Wsmsg_uou struct {
 	O []ctuniverse.UniverseObject `json:"o"`
 }
 
-func (msg Wsmsg) CoerceToType() (interface{}, error) {
+func (msg Wsmsg) CoerceToType(map[string]interface{}) (interface{}, error) {
 	switch msg.Event {
 		case "idreq":
 			return Wsmsg_idreq{msg}, nil
