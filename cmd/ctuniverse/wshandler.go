@@ -41,7 +41,7 @@ func (c *Client) writePump() {
 	}
 }
 
-func wshandler(w http.ResponseWriter, r *http.Request) {
+func wshandler(h *Hub, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		fmt.Println(err)
