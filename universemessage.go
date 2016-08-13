@@ -9,6 +9,12 @@ import (
 )
 */
 
+type UniverseMessage struct {
+	Messagetype string      `json:"messagetype"`
+	O           interface{} `json:o`
+}
+
+/*
 type UniverseMsg struct {
 	Event string `json:"event"`
 	Epoch int64  `json:"epoch"`
@@ -55,6 +61,7 @@ type UniverseMsg_uou struct {
 	UniverseMsg
 	O []UniverseObject `json:"o"`
 }
+*/
 
 // Not correct syntax for coercing types.. not needed anymore.. yet
 /*

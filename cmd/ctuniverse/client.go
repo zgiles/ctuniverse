@@ -11,7 +11,9 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"github.com/gorilla/websocket"
+	"github.com/zgiles/ctuniverse"
 	"log"
 	"net/http"
 )
@@ -35,7 +37,7 @@ var upgrader = websocket.Upgrader{
 type Client struct {
 	hub        *Hub
 	conn       *websocket.Conn
-	send       chan []byte
+	send       chan *ctuniverse.UniverseMessage
 	uuid       string
 	attributes map[string]string
 }
@@ -63,7 +65,12 @@ func (c *Client) writePump() {
 			log.Printf("error: %v", writeerr)
 			return
 		}
-		w.Write(message)
+		b, berr := json.Marshal(message)
+		if berr != nil {
+			log.Printf("error: %v", berr)
+			return
+		}
+		w.Write(b)
 		// Maybe optimize for more messages at once like in the chat example, keep simple for now and just close
 		closeerr := w.Close()
 		if closeerr != nil {
@@ -88,7 +95,13 @@ func (c *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		c.hub.broadcast <- message
+		var o ctuniverse.UniverseMessage
+		oerr := json.Unmarshal(message, &o)
+		if oerr != nil || o.O == nil {
+			log.Printf("error: %+v", oerr)
+			break
+		}
+		c.hub.broadcast <- &o
 	}
 }
 
@@ -98,9 +111,9 @@ func wshandler(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Printf("error: %v", err)
 		return
 	}
-	c := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+	c := &Client{hub: hub, conn: conn, send: make(chan *ctuniverse.UniverseMessage, 256)}
 	c.hub.register <- c
-	log.Println("New Client: %s", c)
+	log.Printf("New Client: %+v", c)
 	go c.writePump()
 	c.readPump()
 }
