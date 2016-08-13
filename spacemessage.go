@@ -5,5 +5,5 @@ package ctuniverse
 
 type SpaceMessage struct {
 	Messagetype string      `json:"messagetype"`
-	O           interface{} `json:o`
+	O           interface{} `json:"o"`
 }
