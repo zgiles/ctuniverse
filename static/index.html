@@ -50,6 +50,20 @@
 		$('#badobjects').text(JSON.stringify(badobjects));
 	}
 
+	function wrapmessage(o, mt) {
+		if (mt == undefined) {
+			mt = "object"
+		}
+		return {
+			messagetype: mt,
+			o: o
+		}
+	}
+
+	function unwrapmessages(o) {
+		return (o != undefined && o.O != undefined) ? o.O : {}
+	}
+
 	$(function() {
 		$('#owneruuid').text(owneruuid);
 
@@ -64,14 +78,14 @@
 			console.log("WebSocket Open!");
 			// This sends our data out every second.
 			sendtimer = setInterval(function() {
-				socket.send(JSON.stringify(ship));
+				socket.send(JSON.stringify(wrapmessage(ship)));
 				console.log('timer: sending ship');
 			}, 1000);
 		}
 
 		socket.onmessage = function(e) {
 			console.log(e);
-			m = JSON.parse(e.data) || {};
+			m = unwrapmessages(JSON.parse(e.data))
 			console.log(m);
 			if (m.uuid != undefined) {
 				universe[m.uuid] = m;
