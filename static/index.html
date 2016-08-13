@@ -72,7 +72,7 @@
 		rendertimer = setInterval(render, 100);
 		updatetimer = setInterval(updatemyship, 1000);
 
-		var socket = new WebSocket("ws://bubbles.ri.zrg.cc:8080/ws");
+		var socket = new WebSocket("ws://" + location.host + "/ws");
 
 		socket.onopen = function() {
 			console.log("WebSocket Open!");
