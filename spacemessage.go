@@ -3,7 +3,7 @@
 
 package ctuniverse
 
-type UniverseMessage struct {
+type SpaceMessage struct {
 	Messagetype string      `json:"messagetype"`
 	O           interface{} `json:o`
 }

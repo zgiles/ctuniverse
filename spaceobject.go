@@ -1,6 +1,6 @@
 package ctuniverse
 
-type UniverseObject struct {
+type SpaceObject struct {
 	Uuid       string            `json:"uuid" redis:"uuid"`
 	Owner      string            `json:"owner" redis:"owner"`
 	Type       string            `json:"type" redis:"type"`
@@ -11,17 +11,13 @@ type UniverseObject struct {
 	Attributes map[string]string `json:"attributes" redis:"attributes"`
 }
 
-type UniverseControl struct {
+type SpaceControl struct {
 	Uuid   string `json:"uuid" redis:"uuid"`
 	Action string `json:"action" redis:"action"`
 }
 
-type UniverseID struct {
+type SpaceID struct {
 	Uuid string `json:"uuid" redis:"uuid"`
-}
-
-type UniverseIDReq struct {
-	Action string `json:"action" redis:"action"`
 }
 
 // These will be in attributes for now

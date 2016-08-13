@@ -30,7 +30,7 @@ func goodOrigin(r *http.Request) bool {
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	CheckOrigin: goodOrigin,
+	CheckOrigin:     goodOrigin,
 }
 
 // Short explaination
@@ -42,8 +42,8 @@ var upgrader = websocket.Upgrader{
 type Client struct {
 	hub          *Hub
 	conn         *websocket.Conn
-	send_object  chan *ctuniverse.UniverseObject
-	send_control chan *ctuniverse.UniverseControl
+	send_object  chan *ctuniverse.SpaceObject
+	send_control chan *ctuniverse.SpaceControl
 	uuid         string
 	attributes   map[string]string
 }
@@ -71,7 +71,7 @@ func (c *Client) writePump() {
 					log.Printf("error: %v", writeerr)
 					return
 				}
-				o := ctuniverse.UniverseMessage{"object", message}
+				o := ctuniverse.SpaceMessage{"SpaceObject", message}
 				b, berr := json.Marshal(o)
 				if berr != nil {
 					log.Printf("error: %v", berr)
@@ -111,15 +111,15 @@ func (c *Client) readPump() {
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 		var raw json.RawMessage
-		r := ctuniverse.UniverseMessage{O: &raw}
+		r := ctuniverse.SpaceMessage{O: &raw}
 		rerr := json.Unmarshal(message, &r)
 		if rerr != nil {
 			log.Printf("error: %+v", rerr)
 			break
 		}
 		switch r.Messagetype {
-		case "object":
-			var o ctuniverse.UniverseObject
+		case "SpaceObject":
+			var o ctuniverse.SpaceObject
 			oerr := json.Unmarshal(raw, &o)
 			if oerr != nil {
 				log.Printf("error: decoding error 4, %+v", o)
@@ -127,16 +127,16 @@ func (c *Client) readPump() {
 			}
 			c.uuid = o.Owner
 			c.hub.broadcast_object <- &o
-		case "control":
-			var o ctuniverse.UniverseControl
+		case "SpaceControl":
+			var o ctuniverse.SpaceControl
 			oerr := json.Unmarshal(raw, &o)
 			if oerr != nil {
 				log.Printf("error: decoding error 5")
 				break
 			}
 			c.hub.broadcast_control <- &o
-		case "id":
-			var o ctuniverse.UniverseID
+		case "SpaceID":
+			var o ctuniverse.SpaceID
 			oerr := json.Unmarshal(raw, &o)
 			if oerr != nil {
 				log.Printf("error: decoding error 6")
@@ -155,7 +155,7 @@ func wshandler(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Printf("error: %v", err)
 		return
 	}
-	c := &Client{hub: hub, conn: conn, send_object: make(chan *ctuniverse.UniverseObject, 256), send_control: make(chan *ctuniverse.UniverseControl, 256)}
+	c := &Client{hub: hub, conn: conn, send_object: make(chan *ctuniverse.SpaceObject, 256), send_control: make(chan *ctuniverse.SpaceControl, 256)}
 	c.hub.register <- c
 	log.Printf("New Client: %+v", c)
 	go c.writePump()

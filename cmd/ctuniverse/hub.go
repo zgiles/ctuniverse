@@ -16,8 +16,8 @@ import (
 // hub maintains the set of active clients and broadcasts messages to the
 // clients.
 type Hub struct {
-	broadcast_object  chan *ctuniverse.UniverseObject // Inbound messages from the clients
-	broadcast_control chan *ctuniverse.UniverseControl
+	broadcast_object  chan *ctuniverse.SpaceObject // Inbound messages from the clients
+	broadcast_control chan *ctuniverse.SpaceControl
 	register          chan *Client     // Register requests from the clients
 	unregister        chan *Client     // Unregister requests from clients
 	clients           map[*Client]bool // Registered clients
@@ -25,8 +25,8 @@ type Hub struct {
 
 func newHub() *Hub {
 	return &Hub{
-		broadcast_object:  make(chan *ctuniverse.UniverseObject),
-		broadcast_control: make(chan *ctuniverse.UniverseControl),
+		broadcast_object:  make(chan *ctuniverse.SpaceObject),
+		broadcast_control: make(chan *ctuniverse.SpaceControl),
 		register:          make(chan *Client),
 		unregister:        make(chan *Client),
 		clients:           make(map[*Client]bool),
