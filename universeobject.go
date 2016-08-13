@@ -11,6 +11,19 @@ type UniverseObject struct {
 	Attributes map[string]string `json:"attributes" redis:"attributes"`
 }
 
+type UniverseControl struct {
+	Uuid   string `json:"uuid" redis:"uuid"`
+	Action string `json:"action" redis:"action"`
+}
+
+type UniverseID struct {
+	Uuid string `json:"uuid" redis:"uuid"`
+}
+
+type UniverseIDReq struct {
+	Action string `json:"action" redis:"action"`
+}
+
 // These will be in attributes for now
 // Decay int64 `json:"decay" redis:"decay"`
 // Fuel int64 `json:"fuel" redis:"fuel"`

@@ -35,11 +35,12 @@ var upgrader = websocket.Upgrader{
 // uuid is this connections id, shows the client has identified itself.. maybe another way later
 // attributes are the additional data about the client, how it wants to receive things, flags, etc.
 type Client struct {
-	hub        *Hub
-	conn       *websocket.Conn
-	send       chan *ctuniverse.UniverseMessageObject
-	uuid       string
-	attributes map[string]string
+	hub          *Hub
+	conn         *websocket.Conn
+	send_object  chan *ctuniverse.UniverseObject
+	send_control chan *ctuniverse.UniverseControl
+	uuid         string
+	attributes   map[string]string
 }
 
 func (c *Client) write(mt int, payload []byte) error {
@@ -53,33 +54,39 @@ func (c *Client) writePump() {
 	}()
 	// forever loop
 	for {
-		// select {
-		message, chanopen := <-c.send //:
-		if !chanopen {
-			c.write(websocket.CloseMessage, []byte{})
-			return
+		select {
+		case message, chanopen := <-c.send_object:
+			if !chanopen {
+				c.write(websocket.CloseMessage, []byte{})
+				return
+			}
+			if message.Owner != c.uuid {
+				w, writeerr := c.conn.NextWriter(websocket.TextMessage)
+				if writeerr != nil {
+					log.Printf("error: %v", writeerr)
+					return
+				}
+				o := ctuniverse.UniverseMessage{"object", message}
+				b, berr := json.Marshal(o)
+				if berr != nil {
+					log.Printf("error: %v", berr)
+					return
+				}
+				w.Write(b)
+				// Maybe optimize for more messages at once like in the chat example, keep simple for now and just close
+				closeerr := w.Close()
+				if closeerr != nil {
+					log.Printf("error: %v", closeerr)
+					return
+				}
+			} // uuids equal
+		case message, chanopen := <-c.send_control:
+			if !chanopen {
+				c.write(websocket.CloseMessage, []byte{})
+				return
+			}
+			log.Printf("control: %+v", message)
 		}
-		if message.O.Uuid != c.uuid {
-			w, writeerr := c.conn.NextWriter(websocket.TextMessage)
-			if writeerr != nil {
-				log.Printf("error: %v", writeerr)
-				return
-			}
-			b, berr := json.Marshal(message)
-			if berr != nil {
-				log.Printf("error: %v", berr)
-				return
-			}
-			w.Write(b)
-			// Maybe optimize for more messages at once like in the chat example, keep simple for now and just close
-			closeerr := w.Close()
-			if closeerr != nil {
-				log.Printf("error: %v", closeerr)
-				return
-			}
-		} // uuids equal
-		// default:
-		// }
 	}
 }
 
@@ -98,28 +105,42 @@ func (c *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		var r ctuniverse.UniverseMessageRaw
+		var raw json.RawMessage
+		r := ctuniverse.UniverseMessage{O: &raw}
 		rerr := json.Unmarshal(message, &r)
 		if rerr != nil {
 			log.Printf("error: %+v", rerr)
 			break
 		}
-		// var o interface{}
 		switch r.Messagetype {
-		case "universeobject":
-			var o ctuniverse.UniverseMessageObject
-			oerr := json.Unmarshal(message, &o)
+		case "object":
+			var o ctuniverse.UniverseObject
+			oerr := json.Unmarshal(raw, &o)
 			if oerr != nil {
-				log.Printf("error: %+v", oerr)
+				log.Printf("error: decoding error 4, %+v", o)
 				break
 			}
-			c.hub.broadcast <- &o
+			c.uuid = o.Owner
+			c.hub.broadcast_object <- &o
+		case "control":
+			var o ctuniverse.UniverseControl
+			oerr := json.Unmarshal(raw, &o)
+			if oerr != nil {
+				log.Printf("error: decoding error 5")
+				break
+			}
+			c.hub.broadcast_control <- &o
+		case "id":
+			var o ctuniverse.UniverseID
+			oerr := json.Unmarshal(raw, &o)
+			if oerr != nil {
+				log.Printf("error: decoding error 6")
+				break
+			}
+			c.uuid = o.Uuid
 		default:
 			log.Printf("Messagetype did not conform to any standard")
 		}
-		// umo, _ := o.(UniverseMessageObject)
-		// umo := o.(ctuniverse.UniverseMessageObject)
-		//c.hub.broadcast <- o
 	}
 }
 
@@ -129,7 +150,7 @@ func wshandler(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Printf("error: %v", err)
 		return
 	}
-	c := &Client{hub: hub, conn: conn, send: make(chan *ctuniverse.UniverseMessageObject, 256)}
+	c := &Client{hub: hub, conn: conn, send_object: make(chan *ctuniverse.UniverseObject, 256), send_control: make(chan *ctuniverse.UniverseControl, 256)}
 	c.hub.register <- c
 	log.Printf("New Client: %+v", c)
 	go c.writePump()
