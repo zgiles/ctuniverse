@@ -9,9 +9,20 @@ import (
 )
 */
 
-type UniverseMessage struct {
+type UniverseMessageRaw struct {
 	Messagetype string      `json:"messagetype"`
 	O           interface{} `json:o`
+}
+
+type UniverseMessageObject struct {
+	Messagetype string         `json:"messagetype"`
+	O           UniverseObject `json:o`
+}
+
+type UniverseMessageControl struct {
+	Messagetype string         `json:"messagetype"`
+	O           UniverseObject `json:o`
+	Action      string         `json:"action"`
 }
 
 /*

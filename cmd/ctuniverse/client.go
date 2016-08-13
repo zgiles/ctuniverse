@@ -37,7 +37,7 @@ var upgrader = websocket.Upgrader{
 type Client struct {
 	hub        *Hub
 	conn       *websocket.Conn
-	send       chan *ctuniverse.UniverseMessage
+	send       chan *ctuniverse.UniverseMessageObject
 	uuid       string
 	attributes map[string]string
 }
@@ -46,7 +46,7 @@ func (c *Client) write(mt int, payload []byte) error {
 	return c.conn.WriteMessage(mt, payload)
 }
 
-// This is write to client from the Hub via the send channel
+// Write to the websocket from the Hub
 func (c *Client) writePump() {
 	defer func() {
 		c.conn.Close()
@@ -59,28 +59,31 @@ func (c *Client) writePump() {
 			c.write(websocket.CloseMessage, []byte{})
 			return
 		}
-		// here check if it is a message from us..
-		w, writeerr := c.conn.NextWriter(websocket.TextMessage)
-		if writeerr != nil {
-			log.Printf("error: %v", writeerr)
-			return
-		}
-		b, berr := json.Marshal(message)
-		if berr != nil {
-			log.Printf("error: %v", berr)
-			return
-		}
-		w.Write(b)
-		// Maybe optimize for more messages at once like in the chat example, keep simple for now and just close
-		closeerr := w.Close()
-		if closeerr != nil {
-			log.Printf("error: %v", closeerr)
-			return
-		}
+		if message.O.Uuid != c.uuid {
+			w, writeerr := c.conn.NextWriter(websocket.TextMessage)
+			if writeerr != nil {
+				log.Printf("error: %v", writeerr)
+				return
+			}
+			b, berr := json.Marshal(message)
+			if berr != nil {
+				log.Printf("error: %v", berr)
+				return
+			}
+			w.Write(b)
+			// Maybe optimize for more messages at once like in the chat example, keep simple for now and just close
+			closeerr := w.Close()
+			if closeerr != nil {
+				log.Printf("error: %v", closeerr)
+				return
+			}
+		} // uuids equal
+		// default:
 		// }
 	}
 }
 
+// Write to the Hub from websocket
 func (c *Client) readPump() {
 	defer func() {
 		c.hub.unregister <- c
@@ -95,13 +98,28 @@ func (c *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		var o ctuniverse.UniverseMessage
-		oerr := json.Unmarshal(message, &o)
-		if oerr != nil || o.O == nil {
-			log.Printf("error: %+v", oerr)
+		var r ctuniverse.UniverseMessageRaw
+		rerr := json.Unmarshal(message, &r)
+		if rerr != nil {
+			log.Printf("error: %+v", rerr)
 			break
 		}
-		c.hub.broadcast <- &o
+		// var o interface{}
+		switch r.Messagetype {
+		case "universeobject":
+			var o ctuniverse.UniverseMessageObject
+			oerr := json.Unmarshal(message, &o)
+			if oerr != nil {
+				log.Printf("error: %+v", oerr)
+				break
+			}
+			c.hub.broadcast <- &o
+		default:
+			log.Printf("Messagetype did not conform to any standard")
+		}
+		// umo, _ := o.(UniverseMessageObject)
+		// umo := o.(ctuniverse.UniverseMessageObject)
+		//c.hub.broadcast <- o
 	}
 }
 
@@ -111,7 +129,7 @@ func wshandler(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Printf("error: %v", err)
 		return
 	}
-	c := &Client{hub: hub, conn: conn, send: make(chan *ctuniverse.UniverseMessage, 256)}
+	c := &Client{hub: hub, conn: conn, send: make(chan *ctuniverse.UniverseMessageObject, 256)}
 	c.hub.register <- c
 	log.Printf("New Client: %+v", c)
 	go c.writePump()
