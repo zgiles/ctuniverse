@@ -1,6 +1,9 @@
-# ctuniverse
 
+# ctuniverse
 Space object tracker for CT moon lander  
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/zgiles/ctuniverse)](https://goreportcard.com/report/github.com/zgiles/ctuniverse)
+[![Build Status](https://drone.io/github.com/zgiles/ctuniverse/status.png)](https://drone.io/github.com/zgiles/ctuniverse/latest)
 
 ## Requirements
 * Go  
