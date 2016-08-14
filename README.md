@@ -15,12 +15,12 @@ This app provides an ability to print the git hash it was pulled from and build 
 The app can also be installed using standard `go get` methods.  
 Example for full `go get`:  
 ```
-go get -ldflags "-X main.Buildtime=`date -u '+%Y-%m-%d_%I:%M:%S%p'` -X main.Githash=`git rev-parse HEAD`" github.com/zgiles/ctuniverse/...
+go get -ldflags "-X main.buildtime=`date -u '+%Y-%m-%d_%I:%M:%S%p'` -X main.githash=`git rev-parse HEAD`" github.com/zgiles/ctuniverse/...
 ```
 
 Example of just building:  
 ```
-go build -ldflags "-X main.Buildtime=`date -u '+%Y-%m-%d_%I:%M:%S%p'` -X main.Githash=`git rev-parse HEAD`" github.com/zgiles/ctuniverse/...
+go build -ldflags "-X main.buildtime=`date -u '+%Y-%m-%d_%I:%M:%S%p'` -X main.githash=`git rev-parse HEAD`" github.com/zgiles/ctuniverse/...
 ```
 
 ## Release History

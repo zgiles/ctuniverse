@@ -6,6 +6,7 @@
 // MIT License (Expat)
 //
 // Please see the LICENSE file
+
 package main
 
 import (
@@ -32,6 +33,7 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin:     goodOrigin,
 }
 
+// Client is a struct for each websocket client
 // Short explaination
 // hub is a pointer to the hub so the threads can all access it. contention will be taken care of by chan's etc
 // conn is a pointer to the websocket instance for this connection so the threads can access it.
@@ -41,8 +43,8 @@ var upgrader = websocket.Upgrader{
 type Client struct {
 	hub          *Hub
 	conn         *websocket.Conn
-	send_object  chan *ctuniverse.SpaceObject
-	send_control chan *ctuniverse.SpaceControl
+	sendObject  chan *ctuniverse.SpaceObject
+	sendControl chan *ctuniverse.SpaceControl
 	uuid         string
 	attributes   map[string]string
 }
@@ -59,7 +61,7 @@ func (c *Client) writePump() {
 	// forever loop
 	for {
 		select {
-		case message, chanopen := <-c.send_object:
+		case message, chanopen := <-c.sendObject:
 			if !chanopen {
 				c.write(websocket.CloseMessage, []byte{})
 				return
@@ -84,7 +86,7 @@ func (c *Client) writePump() {
 					return
 				}
 			} // uuids equal
-		case message, chanopen := <-c.send_control:
+		case message, chanopen := <-c.sendControl:
 			if !chanopen {
 				c.write(websocket.CloseMessage, []byte{})
 				return
@@ -125,7 +127,7 @@ func (c *Client) readPump() {
 				break
 			}
 			c.uuid = o.Owner
-			c.hub.broadcast_object <- &o
+			c.hub.broadcastObject <- &o
 		case "SpaceControl":
 			var o ctuniverse.SpaceControl
 			oerr := json.Unmarshal(raw, &o)
@@ -133,7 +135,7 @@ func (c *Client) readPump() {
 				log.Printf("error: decoding error 5")
 				break
 			}
-			c.hub.broadcast_control <- &o
+			c.hub.broadcastControl <- &o
 		case "SpaceID":
 			var o ctuniverse.SpaceID
 			oerr := json.Unmarshal(raw, &o)
@@ -141,7 +143,7 @@ func (c *Client) readPump() {
 				log.Printf("error: decoding error 6")
 				break
 			}
-			c.uuid = o.Uuid
+			c.uuid = o.UUID
 		default:
 			log.Printf("Messagetype did not conform to any standard")
 		}
@@ -154,7 +156,7 @@ func wshandler(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Printf("error: %v", err)
 		return
 	}
-	c := &Client{hub: hub, conn: conn, send_object: make(chan *ctuniverse.SpaceObject, 256), send_control: make(chan *ctuniverse.SpaceControl, 256)}
+	c := &Client{hub: hub, conn: conn, sendObject: make(chan *ctuniverse.SpaceObject, 256), sendControl: make(chan *ctuniverse.SpaceControl, 256)}
 	c.hub.register <- c
 	log.Printf("New Client: %+v", c)
 	go c.writePump()

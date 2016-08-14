@@ -2,6 +2,7 @@
 // MIT License (Expat)
 //
 // Please see the LICENSE file
+
 package main
 
 import (
@@ -16,9 +17,9 @@ import (
 	"time"
 )
 
-var Appname = "ctuniverse"
-var Buildtime = "NoDateTimeProvided"
-var Githash = "NoGitHashProvided"
+var appname = "ctuniverse"
+var buildtime = "NoDateTimeProvided"
+var githash = "NoGitHashProvided"
 
 func main() {
 	// Options Parse
@@ -29,15 +30,15 @@ func main() {
 		log.Fatal(configerr)
 	}
 
-	log.Printf("AppName: %s", Appname)
-	log.Printf("GitHash: %s", Githash)
-	log.Printf("BuildTime: %s", Buildtime)
+	log.Printf("AppName: %s", appname)
+	log.Printf("GitHash: %s", githash)
+	log.Printf("BuildTime: %s", buildtime)
 	log.Println("App Setting up...")
 	hub := newHub()
 	go hub.run()
 
 	// Handlers
-	commonHandlers := alice.New(context.ClearHandler, logging.LoggingHandler, logging.RecoverHandler)
+	commonHandlers := alice.New(context.ClearHandler, logging.TimeHandler, logging.RecoverHandler)
 
 	router := httprouter.New()
 	router.GET("/", wrapHandler(http.FileServer(http.Dir("static/"))))
@@ -52,7 +53,7 @@ func main() {
 	httpsrv := &graceful.Server{
 		Timeout: time.Duration(config.Serverconfig.Closetimeout) * time.Second,
 		Server: &http.Server{
-			Addr:    config.Serverconfig.Ip + ":" + strconv.FormatInt(config.Serverconfig.Port, 10),
+			Addr:    config.Serverconfig.IP + ":" + strconv.FormatInt(config.Serverconfig.Port, 10),
 			Handler: router,
 		},
 	}

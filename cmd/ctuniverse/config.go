@@ -2,6 +2,7 @@
 // MIT License (Expat)
 //
 // Please see the LICENSE file
+
 package main
 
 import (
@@ -10,7 +11,7 @@ import (
 
 type serverconfig struct {
 	Maindb       string
-	Ip           string
+	IP           string
 	Port         int64
 	Closetimeout int64
 }
