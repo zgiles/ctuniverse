@@ -3,15 +3,26 @@
 Space object tracker for CT moon lander
 
 ## Requirements
-* Redis
 * Go
 
 ## What does it do
-Provides a way to send and receive object positions (and attributes) for everything in the universe
+Provides a way to send and receive object positions (and attributes) for everything in the universe between game clients via websockets
+See PROTOCOL.md for protocol description.  
+Link for the game soon..  
+
+## Building
+This app provides an ability to print the git hash it was pulled from and build time, if it is included at build-time.
+The app can also be installed using standard `go get` methods.
+Example:
+```
+go build -ldflags "-X main.Buildtime=`date -u '+%Y-%m-%d_%I:%M:%S%p'` -X main.Githash=`git rev-parse HEAD`" github.com/zgiles/ctuniverse/...
+```
 
 ## Release History
 * 0.1.0 - Initial release
 
 ## License
-Copyright (c) 2016 Zachary Giles  
-Licensed under the MIT license.  
+Copyright 2016 Zachary Giles
+MIT License (Expat)
+
+Please see the LICENSE file

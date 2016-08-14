@@ -16,6 +16,10 @@ import (
 	"time"
 )
 
+var Appname = "ctuniverse"
+var Buildtime = "NoDateTimeProvided"
+var Githash = "NoGitHashProvided"
+
 func main() {
 	// Options Parse
 
@@ -25,6 +29,9 @@ func main() {
 		log.Fatal(configerr)
 	}
 
+	log.Printf("AppName: %s", Appname)
+	log.Printf("GitHash: %s", Githash)
+	log.Printf("BuildTime: %s", Buildtime)
 	log.Println("App Setting up...")
 	hub := newHub()
 	go hub.run()
