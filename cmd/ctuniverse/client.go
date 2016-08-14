@@ -34,7 +34,7 @@ var upgrader = websocket.Upgrader{
 }
 
 // Client is a struct for each websocket client
-// Short explaination
+// Short explanation
 // hub is a pointer to the hub so the threads can all access it. contention will be taken care of by chan's etc
 // conn is a pointer to the websocket instance for this connection so the threads can access it.
 // send is a channel to get messages into this connection. The hub will distribute into it. messages coming from this will go into the hub via a channel inside the hub instance
