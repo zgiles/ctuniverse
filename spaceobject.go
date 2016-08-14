@@ -1,14 +1,20 @@
 package ctuniverse
 
 type SpaceObject struct {
-	Uuid       string            `json:"uuid" redis:"uuid"`
-	Owner      string            `json:"owner" redis:"owner"`
-	Type       string            `json:"type" redis:"type"`
-	Global_X   int64             `json:"global_x" redis:"global_x"`
-	Global_Y   int64             `json:"global_y" redis:"global_y"`
-	Velocity_x int64             `json:"velocity_x" redis:"velocity_x"`
-	Velocity_y int64             `json:"velocity_y" redis:"velocity_y"`
-	Attributes map[string]string `json:"attributes" redis:"attributes"`
+	Uuid          string     `json:"uuid" redis:"uuid"`
+	Owner         string     `json:"owner" redis:"owner"`
+	Type          string     `json:"type" redis:"type"`
+	Global        []float64  `json:"global"`
+	Velocity      []float64  `json:"velocity"`
+	Angle         float64    `json:"angle"`
+	AngleVelocity float64    `json:"angle_velocity"`
+	Boost         int64      `json:"boost"`
+	Thrusters     []Thruster `json:"thrusters"`
+}
+
+type Thruster struct {
+	Type   string `json:"type"`
+	Firing int64  `json:"firing"`
 }
 
 type SpaceControl struct {
@@ -24,3 +30,4 @@ type SpaceID struct {
 // Decay int64 `json:"decay" redis:"decay"`
 // Fuel int64 `json:"fuel" redis:"fuel"`
 // Weight int64 `json:"weight" redis:"weight"`
+// Attributes map[string]string `json:"attributes" redis:"attributes"`

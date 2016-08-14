@@ -15,13 +15,17 @@
 		uuid: guid(),
 		owner: owneruuid,
 		type: 'ship',
-		global_x: 0,
-		global_y: 0,
+		global: [0,0],
+		velocity: [0,0],
 		fuel: 10,
-		weight: 100,
-		decay: 0,
-		velocity_x: 0,
-		velocity_y: 0
+		air: 20,
+		angle: 5,
+		angle_velocity: 8,
+		thrusters: [
+			{ type: "right", firing: 0},
+			{ type: "left", firing: 0}
+		],
+		boost: 0
 	}
 
 	function guid() {
@@ -35,10 +39,11 @@
 	}
 
 	function updatemyship() {
-		ship.global_x = ship.global_x + Math.floor(Math.random() * 1000 %1000)-500
-		ship.global_y = ship.global_x + Math.floor(Math.random() * 1000 %1000)-500
-		ship.velocity_x = ship.global_x + Math.floor(Math.random() * 1000 %1000)-500
-		ship.velocity_y = ship.global_x + Math.floor(Math.random() * 1000 %1000)-500
+		ship.global[0] = ship.global[0] + Math.floor(Math.random() * 1000 %1000)-500;
+		ship.global[1] = ship.global[1] + Math.floor(Math.random() * 1000 %1000)-500;
+		ship.velocity[0] = ship.velocity[0] + Math.floor(Math.random() * 1000 %1000)-500;
+		ship.velocity[1] = ship.velocity[1] + Math.floor(Math.random() * 1000 %1000)-500;
+		console.log(ship);
 		render();
 	}
 
@@ -61,7 +66,7 @@
 	}
 
 	function unwrapmessages(o) {
-		return (o != undefined && o.O != undefined) ? o.O : {}
+		return (o != undefined && o.o != undefined) ? o.o : {}
 	}
 
 	$(function() {
@@ -117,8 +122,6 @@
 		<span id="owneruuid"></span>
 		<h2>Your Ship:</h2>
 		<span id="shipspan"></span><br/>
-		<input type="button" id="pushmyship" value="Push Ship"></input>
-		<input type="button" id="updatemyship" value="Update Ship"></input>
 		<h2>Everyone Else's Ships:</h2>
 		<ul id='shiplist'></ul>
 		<h2>BadObjects:</h2>
