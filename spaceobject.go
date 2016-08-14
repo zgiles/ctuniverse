@@ -1,3 +1,7 @@
+// Copyright 2016 Zachary Giles
+// MIT License (Expat)
+//
+// Please see the LICENSE file
 package ctuniverse
 
 type SpaceObject struct {

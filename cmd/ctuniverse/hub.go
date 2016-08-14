@@ -1,12 +1,11 @@
-// Original file from gorilla/websocket chat exampl
-//
 // Copyright 2013 The Gorilla WebSocket Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 //
-// Modified by Zachary Giles
-// Additional code is under the MIT License, a copy of which is found in the LICENSE file.
-
+// Copyright 2016 Zachary Giles
+// MIT License (Expat)
+//
+// Please see the LICENSE file
 package main
 
 import (

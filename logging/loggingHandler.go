@@ -1,6 +1,7 @@
-// Code by Zachary Giles
-// This code is under the MIT License, a copy of which is found in the LICENSE file.
-
+// Copyright 2016 Zachary Giles
+// MIT License (Expat)
+//
+// Please see the LICENSE file
 package logging
 
 import (
