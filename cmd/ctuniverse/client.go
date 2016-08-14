@@ -41,12 +41,12 @@ var upgrader = websocket.Upgrader{
 // uuid is this connections id, shows the client has identified itself.. maybe another way later
 // attributes are the additional data about the client, how it wants to receive things, flags, etc.
 type Client struct {
-	hub          *Hub
-	conn         *websocket.Conn
+	hub         *Hub
+	conn        *websocket.Conn
 	sendObject  chan *ctuniverse.SpaceObject
 	sendControl chan *ctuniverse.SpaceControl
-	uuid         string
-	attributes   map[string]string
+	uuid        string
+	attributes  map[string]string
 }
 
 func (c *Client) write(mt int, payload []byte) error {
@@ -72,7 +72,7 @@ func (c *Client) writePump() {
 					log.Printf("error: %v", writeerr)
 					return
 				}
-				o := ctuniverse.SpaceMessage{"SpaceObject", message}
+				o := ctuniverse.SpaceMessage{Messagetype: "SpaceObject", O: message}
 				b, berr := json.Marshal(o)
 				if berr != nil {
 					log.Printf("error: %v", berr)

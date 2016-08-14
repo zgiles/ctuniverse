@@ -17,18 +17,18 @@ import (
 type Hub struct {
 	broadcastObject  chan *ctuniverse.SpaceObject // Inbound messages from the clients
 	broadcastControl chan *ctuniverse.SpaceControl
-	register          chan *Client     // Register requests from the clients
-	unregister        chan *Client     // Unregister requests from clients
-	clients           map[*Client]bool // Registered clients
+	register         chan *Client     // Register requests from the clients
+	unregister       chan *Client     // Unregister requests from clients
+	clients          map[*Client]bool // Registered clients
 }
 
 func newHub() *Hub {
 	return &Hub{
 		broadcastObject:  make(chan *ctuniverse.SpaceObject),
 		broadcastControl: make(chan *ctuniverse.SpaceControl),
-		register:          make(chan *Client),
-		unregister:        make(chan *Client),
-		clients:           make(map[*Client]bool),
+		register:         make(chan *Client),
+		unregister:       make(chan *Client),
+		clients:          make(map[*Client]bool),
 	}
 }
 
