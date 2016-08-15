@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-	<!-- 
+	<!--
 		// Copyright 2016 Zachary Giles
 		// MIT License
 		//
@@ -31,7 +31,12 @@
 			{ type: "right", firing: 0},
 			{ type: "left", firing: 0}
 		],
-		boost: 0
+		boost: 0,
+		name: randomname()
+	}
+
+  function randomname() {
+		return Math.random().toString(36).substring(7);
 	}
 
 	function guid() {

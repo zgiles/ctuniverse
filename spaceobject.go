@@ -16,6 +16,7 @@ type SpaceObject struct {
 	AngleVelocity float64    `json:"angle_velocity"`
 	Boost         int64      `json:"boost"`
 	Thrusters     []Thruster `json:"thrusters"`
+	Name					string		 `json:"name"`
 }
 
 // Thruster describes thrusters on a SpaceObject, if it has any.
