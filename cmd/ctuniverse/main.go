@@ -6,11 +6,8 @@
 package main
 
 import (
-	"github.com/gorilla/context"
 	"github.com/julienschmidt/httprouter"
-	"github.com/justinas/alice"
-	"github.com/tylerb/graceful" // "gopkg.in/tylerb/graceful.v1"
-	"github.com/zgiles/ctuniverse/logging"
+	"github.com/tylerb/graceful"
 	"log"
 	"net/http"
 	"strconv"
@@ -20,6 +17,10 @@ import (
 var appname = "ctuniverse"
 var buildtime = "NoDateTimeProvided"
 var githash = "NoGitHashProvided"
+
+func panichandler(w http.ResponseWriter, r *http.Request, ps interface{}) {
+	w.Write([]byte("<html>Not Found</html>"))
+}
 
 func main() {
 	// Options Parse
@@ -34,14 +35,17 @@ func main() {
 	log.Printf("GitHash: %s", githash)
 	log.Printf("BuildTime: %s", buildtime)
 	log.Println("App Setting up...")
+
+	// app state
 	hub := newHub()
 	go hub.run()
 
 	// Handlers
-	commonHandlers := alice.New(context.ClearHandler, logging.TimeHandler, logging.RecoverHandler)
-
 	router := httprouter.New()
-	//router.GET("/", wrapHandler(http.FileServer(http.Dir("static/"))))
+	router.RedirectTrailingSlash = true
+	router.RedirectFixedPath = true
+	router.HandleOPTIONS = true
+	router.PanicHandler = panichandler
 
 	router.GET("/", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		log.Printf("[%s] %q %v\n", r.Method, r.URL.String(), time.Now())
@@ -50,11 +54,8 @@ func main() {
 	})
 
 	router.GET("/ws", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		context.Set(r, "params", ps)
 		wshandler(hub, w, r)
 	})
-
-	router.NotFound = commonHandlers.ThenFunc(logging.ErrorHandler)
 
 	log.Println("App running...")
 	// Server
