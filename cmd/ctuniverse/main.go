@@ -41,11 +41,19 @@ func main() {
 	commonHandlers := alice.New(context.ClearHandler, logging.TimeHandler, logging.RecoverHandler)
 
 	router := httprouter.New()
-	router.GET("/", wrapHandler(http.FileServer(http.Dir("static/"))))
+	//router.GET("/", wrapHandler(http.FileServer(http.Dir("static/"))))
+
+	router.GET("/", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		log.Printf("[%s] %q %v\n", r.Method, r.URL.String(), time.Now())
+		a, _ := Asset("static/index.html")
+		w.Write(a)
+	})
+
 	router.GET("/ws", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		context.Set(r, "params", ps)
 		wshandler(hub, w, r)
 	})
+
 	router.NotFound = commonHandlers.ThenFunc(logging.ErrorHandler)
 
 	log.Println("App running...")

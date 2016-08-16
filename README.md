@@ -14,6 +14,16 @@ See PROTOCOL.md for protocol description.
 Link for the game soon..  
 
 ## Building
+Building needs a few pre-req's..  
+1) The bin-data needs to be generated so a static directory is not needed.
+```
+go get github.com/elazarl/go-bindata/...
+go get github.com/zgiles/ctuniverse/...
+cd $GOPATH/src/github.com/zgiles/ctuniverse
+go-bindata -o cmd/ctuniverse/bindata.go static/index.html
+
+```
+2) Build with the hash and date in the main file..  
 This app provides an ability to print the git hash it was pulled from and build time, if it is included at build-time.  
 The app can also be installed using standard `go get` methods.  
 Example for full `go get`:  
