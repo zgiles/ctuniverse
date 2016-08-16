@@ -17,11 +17,14 @@
 	var rendertimer;
 	var updatetimer;
 	var sendtimer;
+	var shipcounter = Math.floor((1 + Math.random())*100);
+	var originalx = Math.floor((1 + Math.random())*30000);
+	var originaly = Math.floor((1 + Math.random())*30000);
 	var ship = {
 		uuid: guid(),
 		owner: owneruuid,
 		type: 'ship',
-		global: [0,0],
+		global: [originalx,originaly],
 		velocity: [0,0],
 		fuel: 10,
 		air: 20,
@@ -36,7 +39,7 @@
 	}
 
   function randomname() {
-		return Math.random().toString(36).substring(7);
+		return Math.random().toString(36).substring(20);
 	}
 
 	function guid() {
@@ -47,23 +50,6 @@
 		}
 		return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
 		s4() + '-' + s4() + s4() + s4();
-	}
-
-	function updatemyship() {
-		ship.global[0] = ship.global[0] + Math.floor(Math.random() * 1000 %1000)-500;
-		ship.global[1] = ship.global[1] + Math.floor(Math.random() * 1000 %1000)-500;
-		ship.velocity[0] = ship.velocity[0] + Math.floor(Math.random() * 1000 %1000)-500;
-		ship.velocity[1] = ship.velocity[1] + Math.floor(Math.random() * 1000 %1000)-500;
-		console.log(ship);
-		render();
-	}
-
-	function render() {
-		$('#shipspan').text(JSON.stringify(ship));
-		$('#shiplist').html(Object.keys(universe).reduce(function(t, x) {
-			return t + '<li>' + JSON.stringify(universe[x]) + '</li>';
-		}, ''));
-		$('#badobjects').text(JSON.stringify(badobjects));
 	}
 
 	function wrapmessage(o, mt) {
@@ -86,7 +72,7 @@
 		// This simulates a normal background physics update and re-render
 		// at different times and not the same as the updates coming off the web.
 		rendertimer = setInterval(render, 100);
-		updatetimer = setInterval(updatemyship, 1000);
+		updatetimer = setInterval(updatemyship, 250);
 
 		var socket = new WebSocket("ws://" + location.host + "/ws");
 
@@ -95,14 +81,11 @@
 			// This sends our data out every second.
 			sendtimer = setInterval(function() {
 				socket.send(JSON.stringify(wrapmessage(ship)));
-				console.log('timer: sending ship');
 			}, 1000);
 		}
 
 		socket.onmessage = function(e) {
-			console.log(e);
 			m = unwrapmessages(JSON.parse(e.data))
-			console.log(m);
 			if (m.uuid != undefined) {
 				universe[m.uuid] = m;
 			} else {
@@ -115,14 +98,45 @@
 			console.log("WebSocket Closed!");
 		}
 
-		$('#pushmyship').click(function() {
-			socket.send(JSON.stringify(ship));
-			console.log('sending ship');
-		});
+		function updatemyship() {
+			ship.velocity[0] = 0;
+			ship.velocity[1] = 0;
+			shipcounter = (shipcounter + 1) % 5000;
+			ship.global[0] = parseInt(Math.sin(shipcounter/10)*10000) + (originalx);
+			ship.global[1] = parseInt(Math.cos(shipcounter/10)*10000) + (originaly);
+			render();
+		}
 
-		$('#updatemyship').click(function() {
-			updatemyship()
-		});
+		function render() {
+			$('#shipspan').text(JSON.stringify(ship));
+			$('#shiplist').html(Object.keys(universe).reduce(function(t, x) {
+				return t + '<li>' + JSON.stringify(universe[x]) + '</li>';
+			}, ''));
+			$('#badobjects').text(JSON.stringify(badobjects));
+
+			// DRAWING
+			var canvas = document.getElementById("space");
+			var ctx = canvas.getContext("2d");
+			var canvasData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+			canvas.style.width = 500+'px';
+			canvas.style.height = 500+'px';
+			// the universe
+			Object.keys(universe).map(function(i) {
+				var index = ( parseInt(universe[i].global[0]/1000) + parseInt(universe[i].global[1]/1000) * canvas.width) * 4;
+				canvasData.data[index + 0] = 0;
+				canvasData.data[index + 1] = 0;
+				canvasData.data[index + 2] = 0;
+				canvasData.data[index + 3] = 255;
+			});
+			// my ship
+			var index = ( parseInt(ship.global[0]/1000) + parseInt(ship.global[1]/1000) * canvas.width) * 4;
+			canvasData.data[index + 0] = 255;
+			canvasData.data[index + 1] = 0;
+			canvasData.data[index + 2] = 0;
+			canvasData.data[index + 3] = 255;
+			ctx.putImageData(canvasData, 0, 0);
+			// END DRAWING
+		}
 
 	});
 
@@ -137,5 +151,7 @@
 		<ul id='shiplist'></ul>
 		<h2>BadObjects:</h2>
 		<ul id='badobjects'></ul>
+		<h2>Canvas:</h2>
+		<canvas id="space" width="250" height="250"></canvas>
 	</body>
 </html>
