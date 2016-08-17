@@ -14,6 +14,9 @@ import (
 	"time"
 )
 
+//go:generate go-bindata -o=bindata.go -pkg=main static/...
+//go:generate gofmt -w -s .
+
 var appname = "ctuniverse"
 var buildtime = "NoDateTimeProvided"
 var githash = "NoGitHashProvided"
