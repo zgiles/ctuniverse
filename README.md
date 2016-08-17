@@ -19,8 +19,8 @@ Building needs a few pre-req's..
 ```
 go get github.com/elazarl/go-bindata/...
 go get github.com/zgiles/ctuniverse/...
-cd $GOPATH/src/github.com/zgiles/ctuniverse
-go-bindata -o cmd/ctuniverse/bindata.go static/index.html
+cd $GOPATH/src/github.com/zgiles/ctuniverse/cmd/ctuniverse
+go generate
 
 ```
 2) Build with the hash and date in the main file..  
