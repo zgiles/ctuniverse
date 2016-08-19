@@ -7,16 +7,20 @@ package ctuniverse
 
 // SpaceObject is an object in the universe.
 type SpaceObject struct {
-	UUID          string     `json:"uuid" redis:"uuid"`
-	Owner         string     `json:"owner" redis:"owner"`
-	Type          string     `json:"type" redis:"type"`
-	Global        []float64  `json:"global"`
-	Velocity      []float64  `json:"velocity"`
-	Angle         float64    `json:"angle"`
-	AngleVelocity float64    `json:"angle_velocity"`
-	Boost         int64      `json:"boost"`
-	Thrusters     []Thruster `json:"thrusters"`
-	Name					string		 `json:"name"`
+	UUID          string            `json:"uuid" redis:"uuid"`
+	Owner         string            `json:"owner" redis:"owner"`
+	Type          string            `json:"type" redis:"type"`
+	Global        []float64         `json:"global"`
+	Velocity      []float64         `json:"velocity"`
+	Angle         float64           `json:"angle"`
+	AngleVelocity float64           `json:"angle_velocity"`
+	Boost         int64             `json:"boost"`
+	Mass          float64           `json:"mass"`
+	Air           float64           `json:"air"`
+	Fuel          float64           `json:"fuel"`
+	Thrusters     []Thruster        `json:"thrusters"`
+	Name          string            `json:"name"`
+	Attributes    map[string]string `json:"attributes,omitempty"`
 }
 
 // Thruster describes thrusters on a SpaceObject, if it has any.
