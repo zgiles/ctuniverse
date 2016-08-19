@@ -174,6 +174,7 @@ func (c *Client) readPump() {
 				log.Printf("error: decoding error 7, %+v", o)
 				break
 			}
+			c.uuid = o.Owner
 			c.hub.broadcastChat <- &o
 		default:
 			log.Printf("Messagetype did not conform to any standard")

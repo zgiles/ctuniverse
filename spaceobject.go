@@ -41,6 +41,7 @@ type SpaceID struct {
 }
 
 type SpaceChat struct {
+	Owner         string            `json:"owner"`
 	Name    string `json:"name"`
 	Message string `json:"message"`
 }
