@@ -87,7 +87,7 @@ func (c *Client) writePump() {
 					return
 				}
 			} // uuids equal
-		case message, chanopen := <-c.sendObject:
+		case message, chanopen := <-c.sendChat:
 			if !chanopen {
 				c.write(websocket.CloseMessage, []byte{})
 				return
