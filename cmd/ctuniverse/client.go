@@ -45,6 +45,7 @@ type Client struct {
 	conn        *websocket.Conn
 	sendObject  chan *ctuniverse.SpaceObject
 	sendControl chan *ctuniverse.SpaceControl
+	sendChat    chan *ctuniverse.SpaceChat
 	uuid        string
 	attributes  map[string]string
 }
@@ -86,6 +87,28 @@ func (c *Client) writePump() {
 					return
 				}
 			} // uuids equal
+		case message, chanopen := <-c.sendObject:
+			if !chanopen {
+				c.write(websocket.CloseMessage, []byte{})
+				return
+			}
+			w, writeerr := c.conn.NextWriter(websocket.TextMessage)
+			if writeerr != nil {
+				log.Printf("error: %v", writeerr)
+				return
+			}
+			o := ctuniverse.SpaceMessage{Messagetype: "SpaceChat", O: message}
+			b, berr := json.Marshal(o)
+			if berr != nil {
+				log.Printf("error: %v", berr)
+				return
+			}
+			w.Write(b)
+			closeerr := w.Close()
+			if closeerr != nil {
+				log.Printf("error: %v", closeerr)
+				return
+			}
 		case message, chanopen := <-c.sendControl:
 			if !chanopen {
 				c.write(websocket.CloseMessage, []byte{})
@@ -144,6 +167,14 @@ func (c *Client) readPump() {
 				break
 			}
 			c.uuid = o.UUID
+		case "SpaceChat":
+			var o ctuniverse.SpaceChat
+			oerr := json.Unmarshal(raw, &o)
+			if oerr != nil {
+				log.Printf("error: decoding error 7, %+v", o)
+				break
+			}
+			c.hub.broadcastChat <- &o
 		default:
 			log.Printf("Messagetype did not conform to any standard")
 		}
@@ -156,7 +187,7 @@ func wshandler(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Printf("error: %v", err)
 		return
 	}
-	c := &Client{hub: hub, conn: conn, sendObject: make(chan *ctuniverse.SpaceObject, 256), sendControl: make(chan *ctuniverse.SpaceControl, 256)}
+	c := &Client{hub: hub, conn: conn, sendObject: make(chan *ctuniverse.SpaceObject, 256), sendControl: make(chan *ctuniverse.SpaceControl, 256), sendChat: make(chan *ctuniverse.SpaceChat, 256)}
 	c.hub.register <- c
 	log.Printf("New Client: %+v", c)
 	go c.writePump()

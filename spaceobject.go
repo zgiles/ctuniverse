@@ -40,6 +40,11 @@ type SpaceID struct {
 	UUID string `json:"uuid" redis:"uuid"`
 }
 
+type SpaceChat struct {
+	Name    string `json:"name"`
+	Message string `json:"message"`
+}
+
 // These will be in attributes for now
 // Decay int64 `json:"decay" redis:"decay"`
 // Fuel int64 `json:"fuel" redis:"fuel"`
