@@ -14,7 +14,7 @@ type SpaceObject struct {
 	Velocity      []float64         `json:"velocity"`
 	Angle         float64           `json:"angle"`
 	AngleVelocity float64           `json:"angle_velocity"`
-	Boost         int64             `json:"boost"`
+	Boost         bool              `json:"boost"`
 	Mass          float64           `json:"mass"`
 	Air           float64           `json:"air"`
 	Fuel          float64           `json:"fuel"`
